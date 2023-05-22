@@ -1,4 +1,4 @@
-CC=gcc
+CC=clang
 CFLAGS=-Wall
 OBJ_FLAGS=-I.
 NCURSE=-lncurses
