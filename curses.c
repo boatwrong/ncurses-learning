@@ -5,8 +5,6 @@
 #include"curses.h"
 
 int main(int argc, char* argv[]) {
-
-    FILE *fp;
     WINDOW *logWindow;
     WINDOW *statusWindow;
     WINDOW *lastCommitWindow;
@@ -18,6 +16,7 @@ int main(int argc, char* argv[]) {
     char greeting[] = "terminal git";
     char quitMsg[] = "press 'q' to quit";
 
+    int *p;
     int ch;
     int y;
     int x;
@@ -39,6 +38,7 @@ int main(int argc, char* argv[]) {
     int git_last_commit_start_width;
     int git_last_commit_start_height;
 
+    // Initiallize screen, draw main windows
     initscr();
     keypad(stdscr, TRUE);
 
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     git_log_start_height = 0;
 
     git_status_width = col - (git_log_width + 2);
-    git_status_height = row / 6;
+    git_status_height = row / 4;
     git_status_start_width = git_log_width + 1;
     git_status_start_height = quitMsgHeight + 1;
 
@@ -75,6 +75,8 @@ int main(int argc, char* argv[]) {
     logWindow = createWindow(y, x, start_y, start_x);
     refresh();
 
+    // Retrieve status data
+    getGitStatusOutput();
     y = git_status_height;
     x = git_status_width;
     start_y = git_status_start_height;
@@ -89,17 +91,7 @@ int main(int argc, char* argv[]) {
     lastCommitWindow = createWindow(y, x, start_y, start_x);
     refresh();
 
-    fp = popen("git status", "r");
-    char path[1035];
-    if (fp == NULL) {
-        wprintw(statusWindow, "NOT A GIT REPOSITORY\n");
-    }
-
-    while (fgets(path, sizeof(path), fp) != NULL) {
-        wprintw(statusWindow, "%s", path);
-    }
-    pclose(fp);
-
+    // Take user input. Probably implement switch case here?
     do {
         ch = getch();
         cbreak();
@@ -127,4 +119,24 @@ void destroyWindow(WINDOW *win) {
 // return the centered start position of a centered message.
 int centeredPosition(char *msg, int col) {
     return (col - strlen(msg)) / 2;
+}
+
+void gitStatus() {
+    FILE *fp;
+    fp = popen("git status", "r");
+    char path[1035];
+    if (fp == NULL) {
+        mvwprintw(win, 1, 1, "NOT A GIT REPOSITORY\n");
+    }
+
+    int idx = 1;
+    while (fgets(path, sizeof(path), fp) != NULL) {
+        mvwprintw(win, idx, 1, "%s", path);
+        idx++;
+    }
+    pclose(fp);
+    wrefresh(win);
+}
+
+void appendCharStar(char* list[], char star[]) {
 }
