@@ -1,10 +1,9 @@
-#include<ncurses.h>
 #include<stdlib.h>
 #include<string.h>
-#include<unistd.h>
 #include"curses.h"
 
 int main(int argc, char* argv[]) {
+    struct node* head;
     WINDOW *logWindow;
     WINDOW *statusWindow;
     WINDOW *lastCommitWindow;
@@ -76,12 +75,20 @@ int main(int argc, char* argv[]) {
     refresh();
 
     // Retrieve status data
-    getGitStatusOutput();
-    y = git_status_height;
+    char* git ="\t\tGIT STATUS\n\n";
+    head = init(git);
+    int res = populateList(head);
+    if (res == 0) {
+        y = getLength(head);
+    }
+    else {
+        y = git_status_height;
+    }
     x = git_status_width;
     start_y = git_status_start_height;
     start_x = git_status_start_width; 
     statusWindow = createWindow(y, x, start_y, start_x);
+    wPrintList(statusWindow, head);
     refresh();
 
     y = git_last_commit_height;
@@ -102,7 +109,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-
 WINDOW *createWindow(int y, int x, int start_y, int start_x) {
     WINDOW *myWin = newwin(y, x, start_y, start_x);
     box(myWin, 0, 0);
@@ -121,22 +127,116 @@ int centeredPosition(char *msg, int col) {
     return (col - strlen(msg)) / 2;
 }
 
-void gitStatus() {
+int populateList(struct node* head) {
+    int len;
     FILE *fp;
     fp = popen("git status", "r");
     char path[1035];
+    char* line = (char*)NULL;
+
     if (fp == NULL) {
-        mvwprintw(win, 1, 1, "NOT A GIT REPOSITORY\n");
+        pclose(fp);
+        return 1;
     }
 
-    int idx = 1;
-    while (fgets(path, sizeof(path), fp) != NULL) {
-        mvwprintw(win, idx, 1, "%s", path);
-        idx++;
+    else {
+        int idx = 1;
+        do {
+            len = strlen(path);
+            line = (char*)malloc(sizeof(char) * len);
+            strcpy(line, path);
+            if (line != (char*)NULL) {
+                append(head, line);
+            }
+            idx++;
+        } while (fgets(path, sizeof(path), fp) != NULL); 
+        pclose(fp);
+
+        return 0;
     }
-    pclose(fp);
-    wrefresh(win);
+
+    return 2;
 }
 
-void appendCharStar(char* list[], char star[]) {
+
+int gitStatus(WINDOW* win) {
+    int len;
+    FILE *fp;
+    fp = popen("git status", "r");
+    char path[1035];
+    char* line = (char*)NULL;
+    if (fp == NULL) {
+        mvwprintw(win, 1, 1, "NOT A GIT REPOSITORY\n");
+        pclose(fp);
+        wrefresh(win);
+        return 1;
+    }
+    else {
+        int idx = 1;
+        do {
+            len = strlen(path);
+            line = (char*)malloc(sizeof(char) * len);
+            strcpy(line, path);
+            if (line != (char*)NULL) {
+                // TODO/dev
+            }
+            idx++;
+        }
+        while (fgets(path, sizeof(path), fp) != NULL); 
+        pclose(fp);
+        wrefresh(win);
+        return 0;
+    }
+}
+
+// initialize list 
+struct node* init(char* str) {
+    printf("initializing list with string: %s\n", str);
+
+    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
+    tmp->line = str;
+    tmp->next = NULL;
+    return tmp;
+}
+
+// append new node to list
+void append(struct node* head, char* str) {
+    printf("appending to list with string: %s\n", str);
+
+    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
+    tmp->next = head;
+
+    while (tmp->next != NULL) {
+        tmp = tmp->next;
+    }
+
+    struct node* newNode = (struct node*) malloc(sizeof(struct node*));
+    newNode->line = str;
+    newNode->next = NULL;
+    tmp->next = newNode;
+}
+
+// print list of strings to window. left aligned, no limit on lenght
+// implemented so long strings will overflow out of screen.
+void wPrintList(WINDOW *win, struct node* head) {
+    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
+    tmp = head;
+
+    while (tmp != NULL) {
+        wprintw(win,"%s\n", tmp->line);
+        tmp = tmp->next;
+    }
+}
+
+int getLength(struct node* head) {
+    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
+    int len = 0;
+
+    tmp = head;
+    while (tmp != NULL) {
+        len++;
+        printf("%s\n", tmp->line);
+        tmp = tmp->next;
+    }
+    return len;
 }

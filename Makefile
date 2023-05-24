@@ -7,4 +7,4 @@ curses: curses.c curses.h
 	$(CC) $(CFLAGS) $(NCURSE) -o $@ $<
 
 clean:
-	rm -rf a.out* curses *.o *.dSYM *.DS_STORE
+	rm -rf test curses *.o *.dSYM *.DS_STORE
