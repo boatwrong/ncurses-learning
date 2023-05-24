@@ -75,8 +75,8 @@ int main(int argc, char* argv[]) {
     refresh();
 
     // Retrieve status data
-    char* git ="\t\tGIT STATUS\n\n";
-    head = init(git);
+    char* git ="GIT STATUS";
+    head = newNode(git);
     int res = populateList(head);
     if (res == 0) {
         y = getLength(head);
@@ -142,9 +142,16 @@ int populateList(struct node* head) {
     else {
         int idx = 1;
         do {
-            len = strlen(path);
-            line = (char*)malloc(sizeof(char) * len);
-            strcpy(line, path);
+                len = strlen(path);
+            if (1 > len) {
+                strcpy(line,"");
+            }
+
+            else {
+                line = (char*)malloc(sizeof(char) * len);
+                strcpy(line, path);
+            }
+
             if (line != (char*)NULL) {
                 append(head, line);
             }
@@ -158,84 +165,50 @@ int populateList(struct node* head) {
     return 2;
 }
 
-
-int gitStatus(WINDOW* win) {
-    int len;
-    FILE *fp;
-    fp = popen("git status", "r");
-    char path[1035];
-    char* line = (char*)NULL;
-    if (fp == NULL) {
-        mvwprintw(win, 1, 1, "NOT A GIT REPOSITORY\n");
-        pclose(fp);
-        wrefresh(win);
-        return 1;
-    }
-    else {
-        int idx = 1;
-        do {
-            len = strlen(path);
-            line = (char*)malloc(sizeof(char) * len);
-            strcpy(line, path);
-            if (line != (char*)NULL) {
-                // TODO/dev
-            }
-            idx++;
-        }
-        while (fgets(path, sizeof(path), fp) != NULL); 
-        pclose(fp);
-        wrefresh(win);
-        return 0;
-    }
-}
-
-// initialize list 
-struct node* init(char* str) {
-    printf("initializing list with string: %s\n", str);
-
+struct node* newNodeEmpty() {
     struct node* tmp = (struct node*) malloc(sizeof(struct node*));
-    tmp->line = str;
     tmp->next = NULL;
     return tmp;
 }
 
-// append new node to list
-void append(struct node* head, char* str) {
-    printf("appending to list with string: %s\n", str);
+struct node* newNode(char* str) {
+    struct node* tmp = newNodeEmpty();
+    tmp->line = str;
+    return tmp;
+}
 
-    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
+void append(struct node* head, char* str) {
+    struct node* tmp = newNodeEmpty();
     tmp->next = head;
 
     while (tmp->next != NULL) {
         tmp = tmp->next;
     }
 
-    struct node* newNode = (struct node*) malloc(sizeof(struct node*));
-    newNode->line = str;
-    newNode->next = NULL;
-    tmp->next = newNode;
+    struct node* nextNode = newNode(str);
+    tmp->next = nextNode;
 }
 
-// print list of strings to window. left aligned, no limit on lenght
-// implemented so long strings will overflow out of screen.
 void wPrintList(WINDOW *win, struct node* head) {
-    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
+    struct node* tmp = newNodeEmpty();
     tmp = head;
 
+    int idx = 1;
     while (tmp != NULL) {
-        wprintw(win,"%s\n", tmp->line);
+        mvwprintw(win,idx,2,"%s\n", tmp->line);
+        wrefresh(win);
         tmp = tmp->next;
+        idx++;
     }
 }
 
 int getLength(struct node* head) {
-    struct node* tmp = (struct node*) malloc(sizeof(struct node*));
     int len = 0;
-
+    struct node* tmp = newNodeEmpty();
     tmp = head;
+
     while (tmp != NULL) {
         len++;
-        printf("%s\n", tmp->line);
         tmp = tmp->next;
     }
     return len;
