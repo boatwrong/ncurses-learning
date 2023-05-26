@@ -74,7 +74,6 @@ int main(int argc, char* argv[]) {
     logWindow = createWindow(y, x, start_y, start_x);
     refresh();
 
-    // Retrieve status data
     char* git ="GIT STATUS";
     head = newNode(git);
     int res = populateList(head);
@@ -154,6 +153,7 @@ int populateList(struct node* head) {
 
             if (line != (char*)NULL) {
                 append(head, line);
+                // free(line);
             }
             idx++;
         } while (fgets(path, sizeof(path), fp) != NULL); 
