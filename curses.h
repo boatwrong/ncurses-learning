@@ -1,5 +1,7 @@
 #include<ncurses.h>
 
+#define EMPTY_STR ""
+
 struct node {
     char* line;
     struct node* next;
@@ -8,10 +10,12 @@ struct node {
 WINDOW *createWindow(int y, int x, int start_y, int start_x);
 void destroyWindow(WINDOW *win);
 int centeredPosition(char *msg, int col);
-int populateList(struct node* head);
+int gitCmd(int n, struct node* head, char* cmd); 
 int gitStatus(WINDOW* win);
 struct node* newNode(char* str);
 struct node* newNodeEmpty();
 void append(struct node* head, char* str);
 void wPrintList(WINDOW *win, struct node* head);
+void nwPrintList(int n, WINDOW *win, struct node* head); 
 int getLength(struct node* head);
+void trimRight(char* str); 
