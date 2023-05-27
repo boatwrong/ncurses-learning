@@ -29,5 +29,6 @@ void nwPrintList(int n, WINDOW *win, struct node* head);
 int getLength(struct node* head);
 void trimRight(char* str); 
 void freeList(struct node* head);
+void basicGitWindow(struct gitWindow git); 
 void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history); 
 void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight); 

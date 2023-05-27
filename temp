@@ -1,0 +1,54 @@
+    // GIT STATUS
+
+    char* status ="GIT STATUS";
+    char* statusCmd = "git status";
+    // gitStatusHead = newNode(status);
+    git_status.head = newNode(status);
+    // append(gitStatusHead, EMPTY_STR);
+    append(git_status.head, EMPTY_STR);
+    // int res = gitCmd(-1, gitStatusHead, statusCmd);
+    int res = gitCmd(-1, git_status.head, statusCmd);
+    if (res == 0) {
+        // git_status.height = getLength(gitStatusHead) + 3;
+        git_status.height = getLength(git_status.head) + 3;
+    }
+    y = git_status.height;
+    x = git_status.width;
+    start_y = git_status.start_height;
+    start_x = git_status.start_width; 
+    // statusWindow = createWindow(y, x, start_y, start_x);
+    git_status.wind = createWindow(y, x, start_y, start_x);
+    // wPrintList(statusWindow, gitStatusHead);
+    // wPrintList(statusWindow, git_status.head);
+    wPrintList(git_status.wind, git_status.head);
+    // wrefresh(statusWindow);
+    wrefresh(git_status.wind);
+    refresh();
+
+    // COMMIT HISTORY
+    git_commit_history.width = col - (git_log.width + 2);
+    git_commit_history.height = row - (quitMsgHeight + git_status.height + 1);
+    git_commit_history.start_width = git_log.width + 1;
+    git_commit_history.start_height = git_status.height + 4;
+
+    git_commit_history.width = col - (git_log.width + 2);
+    git_commit_history.height = row - (quitMsgHeight + git_status.height + 1);
+    git_commit_history.start_width = git_log.width + 1;
+    git_commit_history.start_height = git_status.height + 4;
+
+    char* commitHistory = "GIT LOG";
+    char* commitHistoryCmd = "git log";
+    git_commit_history.head = newNode(commitHistory);
+    append(git_commit_history.head, EMPTY_STR);
+    res = gitCmd(git_commit_history.height - 3, git_commit_history.head, commitHistoryCmd);
+    y = git_commit_history.height;
+    x = git_commit_history.width;
+    start_y = git_commit_history.start_height;
+    start_x = git_commit_history.start_width; 
+    // commitHistoryWindow = createWindow(y, x, start_y, start_x);
+    git_commit_history.wind = createWindow(y, x, start_y, start_x);
+    // nwPrintList(git_commit_history.height, commitHistoryWindow, gitCommitHistoryHead);
+    nwPrintList(git_commit_history.height, git_commit_history.wind, git_commit_history.head);
+    // wrefresh(commitHistoryWindow);
+    wrefresh(git_commit_history.wind);
+    refresh();
