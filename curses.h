@@ -7,6 +7,15 @@ struct node {
     struct node* next;
 };
 
+struct gitWindow {
+    int height;
+    int width;
+    int start_height;
+    int start_width;
+    struct node* head;
+    WINDOW *wind;
+};
+
 WINDOW *createWindow(int y, int x, int start_y, int start_x);
 void destroyWindow(WINDOW *win);
 int centeredPosition(char *msg, int col);
@@ -19,3 +28,6 @@ void wPrintList(WINDOW *win, struct node* head);
 void nwPrintList(int n, WINDOW *win, struct node* head); 
 int getLength(struct node* head);
 void trimRight(char* str); 
+void freeList(struct node* head);
+void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history); 
+void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight); 

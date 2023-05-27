@@ -6,116 +6,20 @@ int main(int argc, char* argv[]) {
     struct node* gitStatusHead;
     struct node* gitLogHead;
     struct node* gitCommitHistoryHead;
-    WINDOW *logWindow;
-    WINDOW *statusWindow;
-    WINDOW *commitHistoryWindow;
-    int row, col;
-    int center_row;
-    int center_col;
+    struct gitWindow git_log; 
+    struct gitWindow git_status;
+    struct gitWindow git_commit_history;
+
+    int row, col, ch, y, x, start_x, start_y;
+    int *p;
     int greetingHeight = 1;
     int quitMsgHeight = 3;;
-    char greeting[] = "terminal git";
-    char quitMsg[] = "press 'q' to quit";
+    char* greeting = "terminal git";
+    char* quitMsg = "press 'q' to quit";
 
-    int *p;
-    int ch;
-    int y;
-    int x;
-    int start_x;
-    int start_y;
+    initialize(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
 
-    int git_log_width;
-    int git_log_height;
-    int git_log_start_width;
-    int git_log_start_height;
-
-    int git_status_width;
-    int git_status_height;
-    int git_status_start_width;
-    int git_status_start_height;
-
-    int git_commit_history_width;
-    int git_commit_history_height;
-    int git_commit_history_start_width;
-    int git_commit_history_start_height;
-
-    // Initiallize screen, draw main windows
-    initscr();
-    keypad(stdscr, TRUE);
-    refresh();
-
-    getmaxyx(stdscr, row, col);
-    center_row = row / 2;
-    center_col = col / 2;
-
-    git_log_width = col / 7;
-    git_log_height = row;
-    git_log_start_width = 0;
-    git_log_start_height = 0;
-
-    attron(A_BOLD);
-    mvprintw(greetingHeight, centeredPosition(greeting, col), "%s\n", greeting);
-    attroff(A_BOLD);
-    refresh();
-    mvprintw(quitMsgHeight, centeredPosition(quitMsg, col), "%s\n", quitMsg);
-    refresh();
-
-    // GIT LOG PRETTY
-
-    y = git_log_height;
-    x = git_log_width;
-    start_y = git_log_start_height;
-    start_x = git_log_start_width; 
-    logWindow = createWindow(y, x, start_y, start_x);
-    wrefresh(logWindow);
-    refresh();
-
-    git_status_width = col - (git_log_width + 2);
-    git_status_height = row / 4;
-    git_status_start_width = git_log_width + 1;
-    git_status_start_height = quitMsgHeight + 1;
-
-    // GIT STATUS
-
-    char* status ="GIT STATUS";
-    char* statusCmd = "git status";
-    gitStatusHead = newNode(status);
-    append(gitStatusHead, EMPTY_STR);
-    int res = gitCmd(-1, gitStatusHead, statusCmd);
-    if (res == 0) {
-        git_status_height = getLength(gitStatusHead) + 3;
-    }
-    y = git_status_height;
-    x = git_status_width;
-    start_y = git_status_start_height;
-    start_x = git_status_start_width; 
-    statusWindow = createWindow(y, x, start_y, start_x);
-    wPrintList(statusWindow, gitStatusHead);
-    wrefresh(statusWindow);
-    refresh();
-
-    // COMMIT HISTORY
-    git_commit_history_width = col - (git_log_width + 2);
-    git_commit_history_height = row - (quitMsgHeight + git_status_height + 1);
-    git_commit_history_start_width = git_log_width + 1;
-    git_commit_history_start_height = git_status_height + 4;
-
-    char* commitHistory = "GIT LOG";
-    char* commitHistoryCmd = "git log";
-    gitCommitHistoryHead = newNode(commitHistory);
-    append(gitCommitHistoryHead, EMPTY_STR);
-    res = gitCmd(git_commit_history_height - 3, gitCommitHistoryHead, commitHistoryCmd);
-    // if (res == 0) {
-    //     git_commit_history_height = getLength(gitCommitHistoryHead) + 3;
-    // }
-    y = git_commit_history_height;
-    x = git_commit_history_width;
-    start_y = git_commit_history_start_height;
-    start_x = git_commit_history_start_width; 
-    commitHistoryWindow = createWindow(y, x, start_y, start_x);
-    nwPrintList(git_commit_history_height, commitHistoryWindow, gitCommitHistoryHead);
-    wrefresh(commitHistoryWindow);
-    refresh();
+    refreshGitWindows(quitMsgHeight, col, row, git_log, git_status, git_commit_history);
 
     // Take user input. Probably implement switch case here?
     do {
@@ -125,6 +29,9 @@ int main(int argc, char* argv[]) {
     } while (ch != 113 && ch != 81);
 
     endwin();
+    freeList(gitCommitHistoryHead);
+    freeList(gitStatusHead);
+    // freeList(gitLogHead);
     return 0;
 }
 
@@ -169,7 +76,7 @@ int gitCmd(int n, struct node* head, char* cmd) {
                 idx++;
                 continue;
             }
-                len = strlen(path);
+            len = strlen(path);
             if (1 > len) {
                 strcpy(line,"");
             }
@@ -223,9 +130,6 @@ void wPrintList(WINDOW *win, struct node* head) {
 
     int idx = 1;
     while (tmp != NULL) {
-        if (strcmp(tmp->line, EMPTY_STR)) {
-        mvwprintw(win,idx,3,"///////////////////////////////////");
-        }
         mvwprintw(win,idx,3,"%s\n", tmp->line);
         wrefresh(win);
         refresh();
@@ -242,9 +146,6 @@ void nwPrintList(int n, WINDOW *win, struct node* head) {
     while (tmp != NULL) {
         if (n == idx) {
             return;
-        }
-        if (strcmp(tmp->line, EMPTY_STR)) {
-        mvwprintw(win,idx,3,"///////////////////////////////////");
         }
         mvwprintw(win,idx,3,"%s\n", tmp->line);
         wrefresh(win);
@@ -264,4 +165,122 @@ int getLength(struct node* head) {
         tmp = tmp->next;
     }
     return len;
+}
+
+void freeList(struct node* head) {
+    struct node* tmp = newNodeEmpty();
+    tmp = head;
+
+    while (tmp != NULL) {
+        tmp = tmp->next;
+    }
+
+    free(tmp->line);
+    freeList(head);
+}
+
+void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history) {
+    int y, x, start_x, start_y;
+    // GIT LOG PRETTY
+    git_log.width = col / 7;
+    git_log.height = row;
+    git_log.start_width = 0;
+    git_log.start_height = 0;
+
+    git_log.width = col / 7;
+    git_log.height = row;
+    git_log.start_width = 0;
+    git_log.start_height = 0;
+
+    y = git_log.height;
+    x = git_log.width;
+    start_y = git_log.start_height;
+    start_x = git_log.start_width; 
+    // logWindow = createWindow(y, x, start_y, start_x);
+    git_log.wind = createWindow(y, x, start_y, start_x);
+    // wrefresh(logWindow);
+    wrefresh(git_log.wind);
+    refresh();
+
+    git_status.width = col - (git_log.width + 2);
+    git_status.height = row / 4;
+    git_status.start_width = git_log.width + 1;
+    git_status.start_height = quitMsgHeight + 1;
+
+    git_status.width = col - (git_log.width + 2);
+    git_status.height = row / 4;
+    git_status.start_width = git_log.width + 1;
+    git_status.start_height = quitMsgHeight + 1;
+
+    // GIT STATUS
+
+    char* status ="GIT STATUS";
+    char* statusCmd = "git status";
+    // gitStatusHead = newNode(status);
+    git_status.head = newNode(status);
+    // append(gitStatusHead, EMPTY_STR);
+    append(git_status.head, EMPTY_STR);
+    // int res = gitCmd(-1, gitStatusHead, statusCmd);
+    int res = gitCmd(-1, git_status.head, statusCmd);
+    if (res == 0) {
+        // git_status.height = getLength(gitStatusHead) + 3;
+        git_status.height = getLength(git_status.head) + 3;
+    }
+    y = git_status.height;
+    x = git_status.width;
+    start_y = git_status.start_height;
+    start_x = git_status.start_width; 
+    // statusWindow = createWindow(y, x, start_y, start_x);
+    git_status.wind = createWindow(y, x, start_y, start_x);
+    // wPrintList(statusWindow, gitStatusHead);
+    // wPrintList(statusWindow, git_status.head);
+    wPrintList(git_status.wind, git_status.head);
+    // wrefresh(statusWindow);
+    wrefresh(git_status.wind);
+    refresh();
+
+    // COMMIT HISTORY
+    git_commit_history.width = col - (git_log.width + 2);
+    git_commit_history.height = row - (quitMsgHeight + git_status.height + 1);
+    git_commit_history.start_width = git_log.width + 1;
+    git_commit_history.start_height = git_status.height + 4;
+
+    git_commit_history.width = col - (git_log.width + 2);
+    git_commit_history.height = row - (quitMsgHeight + git_status.height + 1);
+    git_commit_history.start_width = git_log.width + 1;
+    git_commit_history.start_height = git_status.height + 4;
+
+    char* commitHistory = "GIT LOG";
+    char* commitHistoryCmd = "git log";
+    git_commit_history.head = newNode(commitHistory);
+    append(git_commit_history.head, EMPTY_STR);
+    res = gitCmd(git_commit_history.height - 3, git_commit_history.head, commitHistoryCmd);
+    y = git_commit_history.height;
+    x = git_commit_history.width;
+    start_y = git_commit_history.start_height;
+    start_x = git_commit_history.start_width; 
+    // commitHistoryWindow = createWindow(y, x, start_y, start_x);
+    git_commit_history.wind = createWindow(y, x, start_y, start_x);
+    // nwPrintList(git_commit_history.height, commitHistoryWindow, gitCommitHistoryHead);
+    nwPrintList(git_commit_history.height, git_commit_history.wind, git_commit_history.head);
+    // wrefresh(commitHistoryWindow);
+    wrefresh(git_commit_history.wind);
+    refresh();
+}
+
+void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
+    int y, x;
+    // Initiallize screen, draw main windows
+    initscr();
+    keypad(stdscr, TRUE);
+    refresh();
+    getmaxyx(stdscr, y, x);
+    attron(A_BOLD);
+    mvprintw(greetingHeight, centeredPosition(greeting, x), "%s\n", greeting);
+    attroff(A_BOLD);
+    refresh();
+    mvprintw(quitMsgHeight, centeredPosition(quitMsg, x), "%s\n", quitMsg);
+    refresh();
+    *row = y;
+    *col = x;
 }
