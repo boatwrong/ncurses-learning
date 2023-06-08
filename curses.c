@@ -29,8 +29,12 @@ int main(int argc, char* argv[]) {
         ch = getch();
         cbreak();
         refresh();
-        if (100 == ch) {
-            gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
+        switch (ch) {
+            case 'q': 
+                continue;
+                break;
+            case 'd': gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
+                      break;
         }
     } while (113 != ch);
 
@@ -66,7 +70,7 @@ int gitCmd(int n, struct node* head, char* cmd) {
     char path[1035];
     char* line = (char*)NULL;
 
-    if (fp == NULL) {
+    if (NULL == fp) {
         pclose(fp);
         return 1;
     }
@@ -92,7 +96,7 @@ int gitCmd(int n, struct node* head, char* cmd) {
                 strcpy(line, path);
             }
 
-            if (line != (char*)NULL) {
+            if ((char*)NULL != line) {
                 append(head, line);
                 // free(line);
             }
@@ -189,7 +193,7 @@ void temp_basicGitWindow(struct gitWindow git, char* status, char* statusCmd) {
     git.head = newNode(status);
     append(git.head, EMPTY_STR);
     int res = gitCmd(-1, git.head, statusCmd);
-    if (res == 0) {
+    if (0 == res) {
         git.height = getLength(git.head) + 3;
     }
     int y = git.height;
@@ -239,7 +243,7 @@ void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git
     append(git_status.head, EMPTY_STR);
     // int res = gitCmd(-1, gitStatusHead, statusCmd);
     int res = gitCmd(-1, git_status.head, statusCmd);
-    if (res == 0) {
+    if (0 == res) {
         // git_status.height = getLength(gitStatusHead) + 3;
         git_status.height = getLength(git_status.head) + 3;
     }
