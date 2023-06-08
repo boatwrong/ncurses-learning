@@ -30,11 +30,13 @@ int main(int argc, char* argv[]) {
         cbreak();
         refresh();
         switch (ch) {
-            case 'q': 
+            case 113: 
                 continue;
                 break;
-            case 'd': gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
+            case 100: gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
                       break;
+            case 10: refreshGitWindows(quitMsgHeight, col, row, git_log, git_status, git_commit_history);
+                     break;
         }
     } while (113 != ch);
 
@@ -305,5 +307,6 @@ void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingH
 
 void gitDiff(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
     erase();
+    initialize(row, col, greeting, quitMsg, greetingHeight, quitMsgHeight);
 }
 
