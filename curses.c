@@ -4,7 +4,7 @@
 
 int main(int argc, char* argv[]) {
     struct node* gitStatusHead;
-    struct node* gitLogHead;
+    // struct node* gitLogHead;
     struct node* gitCommitHistoryHead;
     struct gitWindow git_log; 
     struct gitWindow git_status;
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     int greetingHeight = 1;
     int quitMsgHeight = 3;;
     char* greeting = "terminal git";
-    char* quitMsg = "press 'q' to quit";
+    char* quitMsg = "press 'q' to quit, 'd' for diff";
 
     initialize(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
 
@@ -29,7 +29,10 @@ int main(int argc, char* argv[]) {
         ch = getch();
         cbreak();
         refresh();
-    } while (ch != 113 && ch != 81);
+        if (100 == ch) {
+            gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
+        }
+    } while (113 != ch);
 
     endwin();
     freeList(gitCommitHistoryHead);
@@ -184,8 +187,8 @@ void freeList(struct node* head) {
 
 void temp_basicGitWindow(struct gitWindow git, char* status, char* statusCmd) {
     git.head = newNode(status);
-    append(git_status.head, EMPTY_STR);
-    int res = gitCmd(-1, git_status.head, statusCmd);
+    append(git.head, EMPTY_STR);
+    int res = gitCmd(-1, git.head, statusCmd);
     if (res == 0) {
         git.height = getLength(git.head) + 3;
     }
@@ -211,18 +214,21 @@ void basicGitWindow(struct gitWindow git) {
 
 void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history) {
     int y, x, start_x, start_y;
+
     // GIT LOG PRETTY
     git_log.width = col / 7;
     git_log.height = row;
     git_log.start_width = 0;
     git_log.start_height = 0;
 
-    basicGitWindow(git_log);
+    // basicGitWindow(git_log);
 
     // GIT STATUS
-    git_status.width = col - (git_log.width + 2);
+    // git_status.width = col - (git_log.width + 2);
+    git_status.width = col - 2;
     git_status.height = row / 4;
-    git_status.start_width = git_log.width + 1;
+    // git_status.start_width = git_log.width + 1;
+    git_status.start_width = 0;
     git_status.start_height = quitMsgHeight + 1;
 
     char* status ="GIT STATUS";
@@ -251,9 +257,11 @@ void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git
     refresh();
 
     // COMMIT HISTORY
-    git_commit_history.width = col - (git_log.width + 2);
+    // git_commit_history.width = col - (git_log.width + 2);
+    git_commit_history.width = git_status.width;
     git_commit_history.height = row - (quitMsgHeight + git_status.height + 1);
-    git_commit_history.start_width = git_log.width + 1;
+    // git_commit_history.start_width = git_log.width + 1;
+    git_commit_history.start_width = git_status.start_width;
     git_commit_history.start_height = git_status.height + 4;
 
     char* commitHistory = "GIT LOG";
@@ -290,3 +298,8 @@ void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingH
     *row = y;
     *col = x;
 }
+
+void gitDiff(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
+    erase();
+}
+
