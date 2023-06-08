@@ -7,9 +7,11 @@ int main(int argc, char* argv[]) {
     // struct node* gitLogHead;
     struct node* gitCommitHistoryHead;
     struct gitWindow git_log; 
+    struct gitWindow git_diff; 
     struct gitWindow git_status;
     struct gitWindow git_commit_history;
     git_log.wind = NULL;
+    git_diff.wind = NULL;
     git_status.wind = NULL;
     git_commit_history.wind = NULL;
 
@@ -18,7 +20,7 @@ int main(int argc, char* argv[]) {
     int greetingHeight = 1;
     int quitMsgHeight = 3;;
     char* greeting = "terminal git";
-    char* quitMsg = "press 'q' to quit, 'd' for diff";
+    char* quitMsg = "press 'q' to quit, 'd' for diff, 'ENTER' to refresh";
 
     initialize(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
 
@@ -33,7 +35,7 @@ int main(int argc, char* argv[]) {
             case 113: 
                 continue;
                 break;
-            case 100: gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
+            case 100: gitDiff(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight, git_diff);
                       break;
             case 10: refreshGitWindows(quitMsgHeight, col, row, git_log, git_status, git_commit_history);
                      break;
@@ -305,8 +307,30 @@ void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingH
     *col = x;
 }
 
-void gitDiff(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
+void gitDiff(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff) {
     erase();
     initialize(row, col, greeting, quitMsg, greetingHeight, quitMsgHeight);
+    // GIT DIFF
+    // git_status.width = col - (git_log.width + 2);
+    git_diff.width = *col - 2;
+    git_diff.height = *row / 4;
+    // git_status.start_width = git_log.width + 1;
+    git_diff.start_width = 0;
+    git_diff.start_height = quitMsgHeight + 1;
+
+    char* status ="GIT DIFF";
+    char* statusCmd = "git diff";
+    git_diff.head = newNode(status);
+    append(git_diff.head, EMPTY_STR);
+    int res = gitCmd(-1, git_diff.head, statusCmd);
+    if (0 == res) {
+        // git_status.height = getLength(gitStatusHead) + 3;
+        git_diff.height = getLength(git_diff.head) + 3;
+    }
+    git_diff.wind = createWindow(git_diff.height, git_diff.width, git_diff.start_height, git_diff.start_width);
+    wPrintList(git_diff.wind, git_diff.head);
+    wrefresh(git_diff.wind);
+    refresh();
+
 }
 
