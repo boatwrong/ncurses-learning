@@ -72,6 +72,8 @@ int gitCmd(int n, struct node* head, char* cmd) {
     fp = popen(cmd, "r");
     char path[1035];
     char* line = (char*)NULL;
+    char* lineFix = (char*)NULL;
+    char* authorFix = "Author";
 
     if (NULL == fp) {
         pclose(fp);
@@ -100,7 +102,16 @@ int gitCmd(int n, struct node* head, char* cmd) {
             }
 
             if ((char*)NULL != line) {
-                append(head, line);
+
+                // if line contains author, do some weird workaround 
+                if (strstr(line, authorFix)) {
+                    lineFix = leftTrimFake(1, strlen(line), line);
+                    append(head, lineFix);
+                }
+                else {
+                    append(head, line);
+                }
+
                 // free(line);
             }
             idx++;
@@ -143,7 +154,7 @@ void wPrintList(WINDOW *win, struct node* head) {
 
     int idx = 1;
     while (tmp != NULL) {
-        mvwprintw(win,idx,3,"%s\n", tmp->line);
+        mvwprintw(win,idx,5," %s", tmp->line);
         wrefresh(win);
         refresh();
         tmp = tmp->next;
@@ -160,7 +171,7 @@ void nwPrintList(int n, WINDOW *win, struct node* head) {
         if (n == idx) {
             return;
         }
-        mvwprintw(win,idx,3,"%s\n", tmp->line);
+        mvwprintw(win,idx,3,"\t%s", tmp->line);
         wrefresh(win);
         refresh();
         tmp = tmp->next;
@@ -268,6 +279,7 @@ void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git
     start_x = git_commit_history.start_width; 
     git_commit_history.wind = createWindow(y, x, start_y, start_x);
     nwPrintList(git_commit_history.height, git_commit_history.wind, git_commit_history.head);
+    // wPrintList(git_commit_history.wind, git_commit_history.head);
     wrefresh(git_commit_history.wind);
     refresh();
 }
@@ -280,10 +292,10 @@ void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingH
     refresh();
     getmaxyx(stdscr, y, x);
     attron(A_BOLD);
-    mvprintw(greetingHeight, centeredPosition(greeting, x), "%s\n", greeting);
+    mvprintw(greetingHeight, centeredPosition(greeting, x), "%s", greeting);
     attroff(A_BOLD);
     refresh();
-    mvprintw(quitMsgHeight, centeredPosition(quitMsg, x), "%s\n", quitMsg);
+    mvprintw(quitMsgHeight, centeredPosition(quitMsg, x), "%s", quitMsg);
     refresh();
     *row = y;
     *col = x;
@@ -317,3 +329,14 @@ void gitDiff(int* row, int* col, char* greeting, char* quitMsg, int greetingHeig
 
 }
 
+char* leftTrimFake(int n, int len, char* str) {
+    char* newStr = malloc(sizeof(char*) * len);
+    strncpy(newStr, str + n, len);
+    return newStr;
+}
+
+char* leftTrim(int n, char* str) {
+    char* newStr = NULL;
+    strncpy(newStr, str + n, sizeof(str));
+    return newStr;
+}

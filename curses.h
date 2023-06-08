@@ -33,3 +33,5 @@ void basicGitWindow(struct gitWindow git);
 void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history); 
 void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight); 
 void gitDiff(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff);
+char* leftTrim(int n, char* str);
+char* leftTrimFake(int n, int len, char* str); 
