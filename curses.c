@@ -19,13 +19,13 @@ int main(int argc, char* argv[]) {
     int greetingHeight = 1;
     int quitMsgHeight = 3;;
     char* greeting = "terminal git";
-    char* quitMsg = "press 'q' to quit, 'd' for diff, 'ENTER' to refresh";
+    char* quitMsg = "press 'q' to quit, 'd' for diff, 'r' to refresh";
 
     initscr();
     keypad(stdscr, TRUE);
     refresh();
-    initialize(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
-    refreshGitWindows(quitMsgHeight, col, row, git_log, git_status, git_commit_history);
+    initialize(greeting, quitMsg, greetingHeight, quitMsgHeight);
+    refreshGitWindows(quitMsgHeight, git_log, git_status, git_commit_history);
 
     // Take user input. Probably implement switch case here?
     do {
@@ -33,25 +33,32 @@ int main(int argc, char* argv[]) {
         cbreak();
         refresh();
         switch (ch) {
-            // case 113: 
-            //     continue;
-            //     break;
             case 100: erase();
-                      initialize(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
-                      gitDiff(row, col, greeting, quitMsg, greetingHeight, quitMsgHeight, git_diff);
+                      clearWindows(git_log.wind);
+                      clearWindows(git_diff.wind);
+                      clearWindows(git_status.wind);
+                      initialize(greeting, quitMsg, greetingHeight, quitMsgHeight);
+                      gitDiff(greeting, quitMsg, greetingHeight, quitMsgHeight, git_diff);
                       break;
-            // case 10: erase();
-            //          initialize(&row, &col, greeting, quitMsg, greetingHeight, quitMsgHeight);
-            //          refreshGitWindows(quitMsgHeight, col, row, git_log, git_status, git_commit_history);
-            //          break;
+
+            case 114: erase();
+                      clearWindows(git_log.wind);
+                      clearWindows(git_diff.wind);
+                      clearWindows(git_status.wind);
+                      initialize(greeting, quitMsg, greetingHeight, quitMsgHeight);
+                      refreshGitWindows(quitMsgHeight, git_log, git_status, git_commit_history);
+                      break;
+            default: continue;
+                     break;
         }
     } while (113 != ch);
 
     endwin();
-    // freeList(gitCommitHistoryHead);
-    // freeList(gitStatusHead);
-    // freeList(gitLogHead);
     return 0;
+}
+
+void clearWindows(WINDOW *win) {
+    win = NULL;
 }
 
 WINDOW *createWindow(int y, int x, int start_y, int start_x) {
@@ -123,7 +130,7 @@ int gitCmd(int n, struct node* head, char* cmd, int row) {
                     // append(head, line);
                 }
 
-                // free(line);
+                free(line);
             }
             idx++;
         } while (fgets(path, sizeof(path), fp) != NULL); 
@@ -224,8 +231,14 @@ void basicGitWindow(struct gitWindow git) {
     refresh();
 }
 
-void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history) {
-    int y, x, start_x, start_y;
+// void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history) {
+void refreshGitWindows(int quitMsgHeight, struct gitWindow git_log, struct gitWindow git_status, struct gitWindow git_commit_history) {
+
+    // Initiallize screen, draw main windows
+    int y, x, start_x, start_y, row, col;
+    getmaxyx(stdscr, y, x);
+    row = y;
+    col = x;
 
     // GIT LOG PRETTY
     git_log.width = col / 7;
@@ -278,7 +291,8 @@ void refreshGitWindows(int quitMsgHeight, int col, int row, struct gitWindow git
     refresh();
 }
 
-void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
+// void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
+void initialize(char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight) {
     int y, x;
     // Initiallize screen, draw main windows
     getmaxyx(stdscr, y, x);
@@ -288,13 +302,19 @@ void initialize(int* row, int* col, char* greeting, char* quitMsg, int greetingH
     refresh();
     mvprintw(quitMsgHeight, centeredPosition(quitMsg, x), "%s", quitMsg);
     refresh();
-    *row = y;
-    *col = x;
+    // *row = y;
+    // *col = x;
 }
 
 // TODO: implement a 'less' like scroll function... 
 //       - 'j','k' to scroll but 'ENTER' to return home and 'q' quits all
-void gitDiff(int row, int col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff) {
+// void gitDiff(int row, int col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff) {
+void gitDiff(char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff) {
+    int y, x, start_x, start_y, row, col;
+
+    getmaxyx(stdscr, y, x);
+    row = y;
+    col = x;
 
     // GIT DIFF
     git_diff.width = col - 2;
@@ -313,10 +333,7 @@ void gitDiff(int row, int col, char* greeting, char* quitMsg, int greetingHeight
         git_diff.height = getLength(git_diff.head) + 3;
     }
 
-    // git_diff.wind = createWindow(5,5,5,5);
-    int x,y;
-    getmaxyx(stdscr, y, x);
-    git_diff.wind = createWindow(y - (git_diff.start_height + 15), x - (git_diff.start_width + 15), git_diff.start_height, git_diff.start_width);
+    git_diff.wind = createWindow(y - (git_diff.start_height + 14), x - (git_diff.start_width + 14), git_diff.start_height, git_diff.start_width);
 
     wPrintList(git_diff.wind, git_diff.head);
     wrefresh(git_diff.wind);
