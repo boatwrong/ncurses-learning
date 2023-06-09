@@ -308,7 +308,6 @@ void initialize(char* greeting, char* quitMsg, int greetingHeight, int quitMsgHe
 
 // TODO: implement a 'less' like scroll function... 
 //       - 'j','k' to scroll but 'ENTER' to return home and 'q' quits all
-// void gitDiff(int row, int col, char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff) {
 void gitDiff(char* greeting, char* quitMsg, int greetingHeight, int quitMsgHeight, struct gitWindow git_diff) {
     int y, x, start_x, start_y, row, col;
 
