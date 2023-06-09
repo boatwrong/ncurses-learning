@@ -100,6 +100,7 @@ int gitCmd(int n, struct node* head, char* cmd, int row) {
         int idx = 1;
         do {
             if (idx == n) {
+                append(head, emptyMsg);
                 pclose(fp);
                 return 3;
             }
