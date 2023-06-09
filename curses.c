@@ -88,8 +88,10 @@ int gitCmd(int n, struct node* head, char* cmd, int row) {
     char* lineFix = (char*)NULL;
     char* lineTrimRight = (char*)NULL;
     char* authorFix = "Author";
+    char* emptyMsg = "\n\n\tno diff";
 
     if (NULL == fp) {
+        append(head, emptyMsg);
         pclose(fp);
         return 1;
     }
