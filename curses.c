@@ -88,10 +88,11 @@ int gitCmd(int n, struct node* head, char* cmd, int row) {
     char* lineFix = (char*)NULL;
     char* lineTrimRight = (char*)NULL;
     char* authorFix = "Author";
-    char* emptyMsg = "\n\n\tno diff";
+    // TODO: fix empty message
+    // char* emptyMsg = "\n\n\tno diff";
 
     if (NULL == fp) {
-        append(head, emptyMsg);
+        // append(head, emptyMsg);
         pclose(fp);
         return 1;
     }
@@ -100,7 +101,7 @@ int gitCmd(int n, struct node* head, char* cmd, int row) {
         int idx = 1;
         do {
             if (idx == n) {
-                append(head, emptyMsg);
+                // append(head, emptyMsg);
                 pclose(fp);
                 return 3;
             }
